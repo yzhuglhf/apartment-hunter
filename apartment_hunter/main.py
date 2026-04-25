@@ -1,8 +1,5 @@
-import json
 import os
 import shutil
-import urllib.parse
-import urllib.request
 from datetime import date
 
 import click
@@ -16,37 +13,7 @@ from apartment_hunter.scrapers import diridonwest, lynhaven, maxwell, prometheus
 
 load_dotenv()
 
-NETFLIX_LOS_GATOS = (37.2358, -121.9574)  # 100 Winchester Circle, Los Gatos
-
 console = Console()
-
-
-def geocode(address: str) -> tuple[float, float] | None:
-    q = urllib.parse.quote(address)
-    url = f"https://nominatim.openstreetmap.org/search?q={q}&format=json&limit=1"
-    req = urllib.request.Request(url, headers={"User-Agent": "apartment-hunter/0.1"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r:
-            data = json.loads(r.read())
-        if data:
-            return (float(data[0]["lat"]), float(data[0]["lon"]))
-    except Exception:
-        pass
-    return None
-
-
-def driving_minutes(origin: tuple[float, float], dest: tuple[float, float]) -> int | None:
-    olat, olon = origin
-    dlat, dlon = dest
-    url = (
-        f"https://router.project-osrm.org/route/v1/driving/"
-        f"{olon},{olat};{dlon},{dlat}?overview=false"
-    )
-    try:
-        with urllib.request.urlopen(url, timeout=10) as r:
-            return round(json.loads(r.read())["routes"][0]["duration"] / 60)
-    except Exception:
-        return None
 
 
 @click.command()
