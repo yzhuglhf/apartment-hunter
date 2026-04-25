@@ -5,6 +5,7 @@ from playwright.sync_api import Page, sync_playwright
 from apartment_hunter.scrapers.utils import parse_promo
 
 URL = "https://livelynhaven.com/floorplans/"
+LEASE_MONTHS = 12
 
 
 def scrape() -> list[dict]:
@@ -118,5 +119,6 @@ def _parse(raw: dict, floor_num: int | None) -> dict | None:
         "total_rent": to_int(total_m),
         "a_c": False,
         "promotion": promotion,
+        "lease_months": LEASE_MONTHS,
         "coords": None,
     }

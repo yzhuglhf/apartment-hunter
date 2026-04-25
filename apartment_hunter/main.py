@@ -10,6 +10,7 @@ from rich.table import Table
 
 from apartment_hunter import notifier
 from apartment_hunter.scrapers import diridonwest, lynhaven, maxwell, prometheus
+from apartment_hunter.scrapers.utils import calc_effective_rent
 
 load_dotenv()
 
@@ -43,6 +44,7 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Floor Plan", style="bold")
         t.add_column("Unit", style="cyan")
         t.add_column("Base Rent", style="green")
+        t.add_column("Eff. Rent", style="bright_green")
         t.add_column("Total /mo", style="yellow")
         t.add_column("Beds")
         t.add_column("Baths")
@@ -50,9 +52,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Available")
         t.add_column("Promotion", style="magenta")
         for u in sorted(maxwell_under, key=lambda x: x["base_rent"] or 0):
+            eff = calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months"))
             t.add_row(
                 u["floorplan"], u["unit"],
                 f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                f"${eff:,}" if eff else "—",
                 f"${u['total_rent']:,}" if u["total_rent"] else "—",
                 str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                 f"{u['sqft']:,}" if u["sqft"] else "—",
@@ -75,16 +79,19 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Unit", style="cyan")
         t.add_column("Floor")
         t.add_column("Base Rent", style="green")
+        t.add_column("Eff. Rent", style="bright_green")
         t.add_column("Beds")
         t.add_column("Baths")
         t.add_column("Sq Ft")
         t.add_column("Available")
         t.add_column("Promotion", style="magenta")
         for u in sorted(prom_under, key=lambda x: x["base_rent"] or 0):
+            eff = calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months"))
             t.add_row(
                 u["floorplan"], u.get("unit") or "—",
                 str(u.get("floor") or "—"),
                 f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                f"${eff:,}" if eff else "—",
                 str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                 f"{u['sqft']:,}" if u["sqft"] else "—",
                 u["availability"],
@@ -106,6 +113,7 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Unit", style="cyan")
         t.add_column("Floor")
         t.add_column("Base Rent", style="green")
+        t.add_column("Eff. Rent", style="bright_green")
         t.add_column("Total /mo", style="yellow")
         t.add_column("Beds")
         t.add_column("Baths")
@@ -113,10 +121,12 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Available")
         t.add_column("Promotion", style="magenta")
         for u in sorted(lyn_under, key=lambda x: x["base_rent"] or 0):
+            eff = calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months"))
             t.add_row(
                 u["floorplan"], u["unit"],
                 str(u["floor"]) if u["floor"] else "—",
                 f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                f"${eff:,}" if eff else "—",
                 f"${u['total_rent']:,}" if u["total_rent"] else "—",
                 str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                 f"{u['sqft']:,}" if u["sqft"] else "—",
@@ -138,6 +148,7 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Floor Plan", style="bold")
         t.add_column("Unit", style="cyan")
         t.add_column("Base Rent", style="green")
+        t.add_column("Eff. Rent", style="bright_green")
         t.add_column("Total /mo", style="yellow")
         t.add_column("Beds")
         t.add_column("Baths")
@@ -145,9 +156,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         t.add_column("Available")
         t.add_column("Promotion", style="magenta")
         for u in sorted(dw_under, key=lambda x: x["base_rent"] or 0):
+            eff = calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months"))
             t.add_row(
                 u["floorplan"], u["unit"],
                 f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                f"${eff:,}" if eff else "—",
                 f"${u['total_rent']:,}" if u["total_rent"] else "—",
                 str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                 f"{u['sqft']:,}" if u["sqft"] else "—",
@@ -163,10 +176,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
         sections = [
             {
                 "title": f"Maxwell at Bascom — ≤ ${max_price:,}/mo",
-                "cols": ["Floor Plan", "Unit", "Base Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
+                "cols": ["Floor Plan", "Unit", "Base Rent", "Eff. Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
                 "rows": [
                     [u["floorplan"], u["unit"],
                      f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                     f"${calc_effective_rent(u['base_rent'], u.get('promotion'), u.get('lease_months')):,}" if calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months")) else "—",
                      f"${u['total_rent']:,}" if u["total_rent"] else "—",
                      str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                      f"{u['sqft']:,}" if u["sqft"] else "—",
@@ -176,10 +190,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
             },
             {
                 "title": f"Prometheus Oak Umber — ≤ ${max_price:,}/mo",
-                "cols": ["Floor Plan", "Unit", "Floor", "Base Rent", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
+                "cols": ["Floor Plan", "Unit", "Floor", "Base Rent", "Eff. Rent", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
                 "rows": [
                     [u["floorplan"], u.get("unit") or "—", str(u.get("floor") or "—"),
                      f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                     f"${calc_effective_rent(u['base_rent'], u.get('promotion'), u.get('lease_months')):,}" if calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months")) else "—",
                      str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                      f"{u['sqft']:,}" if u["sqft"] else "—",
                      u["availability"], u.get("promotion") or "—"]
@@ -188,10 +203,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
             },
             {
                 "title": f"Lyn Haven — ≤ ${max_price:,}/mo (floor 1 excluded)",
-                "cols": ["Floor Plan", "Unit", "Floor", "Base Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
+                "cols": ["Floor Plan", "Unit", "Floor", "Base Rent", "Eff. Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
                 "rows": [
                     [u["floorplan"], u["unit"], str(u["floor"]) if u["floor"] else "—",
                      f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                     f"${calc_effective_rent(u['base_rent'], u.get('promotion'), u.get('lease_months')):,}" if calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months")) else "—",
                      f"${u['total_rent']:,}" if u["total_rent"] else "—",
                      str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                      f"{u['sqft']:,}" if u["sqft"] else "—",
@@ -201,10 +217,11 @@ def cli(max_price: int, send_email: bool, setup_cron: bool):
             },
             {
                 "title": f"Diridon West — ≤ ${max_price:,}/mo",
-                "cols": ["Floor Plan", "Unit", "Base Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
+                "cols": ["Floor Plan", "Unit", "Base Rent", "Eff. Rent", "Total /mo", "Beds", "Baths", "Sq Ft", "Available", "Promotion"],
                 "rows": [
                     [u["floorplan"], u["unit"],
                      f"${u['base_rent']:,}" if u["base_rent"] else "—",
+                     f"${calc_effective_rent(u['base_rent'], u.get('promotion'), u.get('lease_months')):,}" if calc_effective_rent(u["base_rent"], u.get("promotion"), u.get("lease_months")) else "—",
                      f"${u['total_rent']:,}" if u["total_rent"] else "—",
                      str(u["bedrooms"] or "—"), str(u["bathrooms"] or "—"),
                      f"{u['sqft']:,}" if u["sqft"] else "—",

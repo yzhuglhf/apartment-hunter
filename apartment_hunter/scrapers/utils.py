@@ -1,5 +1,27 @@
 import re
 
+WEEKS_PER_MONTH = 4.33
+
+
+def calc_effective_rent(base_rent: int, promotion: str | None, lease_months: int) -> int | None:
+    """Return average monthly cost after applying free-weeks/months concession."""
+    if not base_rent or not promotion or not lease_months:
+        return None
+
+    # "N weeks free" (handles "up to N weeks free")
+    m = re.search(r"(\d+)\s*(?:wks?|weeks?)\s*(?:rent\s+)?free", promotion, re.IGNORECASE)
+    if m:
+        free_months = int(m.group(1)) / WEEKS_PER_MONTH
+        return round(base_rent * (lease_months - free_months) / lease_months)
+
+    # "N months free"
+    m = re.search(r"(\d+)\s*months?\s*(?:rent\s+)?free", promotion, re.IGNORECASE)
+    if m:
+        free_months = int(m.group(1))
+        return round(base_rent * (lease_months - free_months) / lease_months)
+
+    return None
+
 
 def parse_promo(text: str) -> str | None:
     """Extract promotion summary from any block of text."""

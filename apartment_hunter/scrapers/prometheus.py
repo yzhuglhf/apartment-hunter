@@ -116,6 +116,9 @@ def _collect_all_plans(page: Page) -> list[dict]:
             seen.add(unit_id)
 
             unit_promo = parse_promo(unit_text) or plan_promo
+            # Lease term is embedded in price string: "$3,092/13mo" → 13
+            lease_m = re.search(r"/(\d+)mo", unit_text)
+            lease_months = int(lease_m.group(1)) if lease_m else 12
 
             units.append({
                 "source": "Prometheus",
@@ -132,6 +135,7 @@ def _collect_all_plans(page: Page) -> list[dict]:
                 "total_rent": None,
                 "a_c": False,
                 "promotion": unit_promo,
+                "lease_months": lease_months,
                 "coords": COORDS,
             })
 

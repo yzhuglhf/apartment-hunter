@@ -6,6 +6,7 @@ from apartment_hunter.scrapers.utils import parse_promo
 
 URL = "https://diridonwest.com/floorplans/"
 COORDS = (37.3265, -121.9027)  # Diridon West, San Jose
+LEASE_MONTHS = 12
 
 
 def scrape() -> list[dict]:
@@ -115,5 +116,6 @@ def _parse(raw: dict) -> dict | None:
         "total_rent": to_int(total_m),
         "a_c": False,
         "promotion": promotion,
+        "lease_months": LEASE_MONTHS,
         "coords": COORDS,
     }

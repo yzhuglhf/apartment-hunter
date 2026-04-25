@@ -6,6 +6,7 @@ from apartment_hunter.scrapers.utils import parse_promo
 
 URL = "https://maxwellatbascom.com/floorplans/"
 COORDS = (37.3098, -121.9498)  # S Bascom Ave, San Jose
+LEASE_MONTHS = 14
 
 
 def scrape() -> list[dict]:
@@ -114,5 +115,6 @@ def _parse(raw: dict) -> dict:
         "total_rent": to_int(total_m),
         "a_c": bool(re.search(r"\bA/?C\b|air.{0,4}condition|central air", raw["text"], re.IGNORECASE)),
         "promotion": promotion,
+        "lease_months": LEASE_MONTHS,
         "coords": COORDS,
     }
