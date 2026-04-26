@@ -19,6 +19,7 @@ def scrape() -> list[dict]:
         property_promo = _scrape_specials(page)
         for u in units:
             u["promotion"] = u["promotion"] or property_promo
+        units = [u for u in units if u.get("floor") != 1]
         browser.close()
     return units
 
@@ -101,10 +102,14 @@ def _parse(raw: dict) -> dict:
     promo_text = raw.get("promo", "") + " " + raw["text"]
     promotion = parse_promo(promo_text)
 
+    floor_m = re.search(r"^(\d)", raw["unit"])
+    floor = int(floor_m.group(1)) if floor_m else None
+
     return {
         "source": "Maxwell",
         "floorplan": floorplan,
         "unit": raw["unit"],
+        "floor": floor,
         "address": "1 S Bascom Ave, San Jose, CA",
         "url": raw["url"],
         "availability": avail,

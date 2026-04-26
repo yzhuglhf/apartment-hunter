@@ -46,6 +46,7 @@ def scrape() -> list[dict]:
         property_promo = _scrape_specials(page)
         for u in units:
             u["promotion"] = u["promotion"] or property_promo
+        units = [u for u in units if u.get("floor") != 1]
         browser.close()
     return units
 
