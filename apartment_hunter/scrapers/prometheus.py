@@ -29,7 +29,6 @@ navigator.permissions.query = (p) =>
 def scrape() -> list[dict]:
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            channel="chrome",
             headless=True,
             args=["--disable-blink-features=AutomationControlled"],
         )

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Library/Frameworks/Python.framework/Versions/3.13/bin/apartment-hunter)",
+      "Bash(sudo launchctl *)",
+      "Bash(log show *)",
+      "Bash(pmset -g log)",
+      "Bash(launchctl load *)",
+      "Bash(crontab -)",
+      "Bash(launchctl list *)"
+    ],
+    "additionalDirectories": [
+      "/Users/yingbingzhu/Library/LaunchAgents"
+    ]
+  }
+}
